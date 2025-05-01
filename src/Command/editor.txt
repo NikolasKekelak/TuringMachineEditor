@@ -1,0 +1,263 @@
+%- Znamena ze nech kazdy znak nahra samostatne na pasku, keby tam nebol museli by byt oddelene ,
+tape Main = {...././.-../.-../---//.--/---/.-./.-../-..$}
+tape Translate
+tape CounterDot
+tape CounterLine
+
+#Alphabet = {A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,R,S,T,U,V,W,X,Y,Z,_,@}
+#IfRead = {/,$}
+#Skip = {$,-,.,/}
+#SkipCounter = {1,X}
+
+
+f(read, /)= (Medzera, /, R , Translate)
+%Ked narazime na Blank, Ideme spocitat . a /
+f(read, Blank) = (goBack,  Blank , L, Main)
+
+f(read,.)=(E,.,R, Main)
+f(read,-)=(T,-,R, Main)
+f(E,.)=(I,.,R, Main)
+f(E,-)=(A,-,R, Main)
+f(A,.)=(R,.,R, Main)
+f(A,-)=(W,-,R, Main)
+f(T,.)=(N,.,R, Main)
+f(T,-)=(M,-,R, Main)
+f(I,.)=(S,.,R, Main)
+f(I,-)=(U,-,R, Main)
+f(N,.)=(D,.,R, Main)
+f(N,-)=(K,-,R, Main)
+f(M,.)=(G,.,R, Main)
+f(M,-)=(O,-,R, Main)
+f(S,.)=(H,.,R, Main)
+f(S,-)=(V,-,R, Main)
+f(U,.)=(F,.,R, Main)
+f(R,.)=(L,.,R, Main)
+f(W,.)=(P,.,R, Main)
+f(W,-)=(U,-,R, Main)
+f(D,.)=(B,.,R, Main)
+f(D,-)=(X,-,R, Main)
+f(K,.)=(C,.,R, Main)
+f(K,-)=(Y,-,R, Main)
+f(G,.)=(Z,.,R, Main)
+f(G,-)=(Q,-,R, Main)
+
+
+%Zapisujeme na pasku
+f(Medzera, Blank) = (read, _ , R , Main)
+
+f(A, IfRead) = (A, IfRead, R, Translate)
+f(A, Blank) = (read, A, R, Main)
+
+f(B, IfRead) = (B, IfRead, R, Translate)
+f(B, Blank) = (read, B, R, Main)
+
+f(C, IfRead) = (C, IfRead, R, Translate)
+f(C, Blank) = (read, C, R, Main)
+
+f(D, IfRead) = (D, IfRead, R, Translate)
+f(D, Blank) = (read, D, R, Main)
+
+f(E, IfRead) = (E, IfRead, R, Translate)
+f(E, Blank) = (read, E, R, Main)
+
+f(F, IfRead) = (F, IfRead, R, Translate)
+f(F, Blank) = (read, F, R, Main)
+
+f(G, IfRead) = (G, IfRead, R, Translate)
+f(G, Blank) = (read, G, R, Main)
+
+f(H, IfRead) = (H, IfRead, R, Translate)
+f(H, Blank) = (read, H, R, Main)
+
+f(I, IfRead) = (I, IfRead, R, Translate)
+f(I, Blank) = (read, I, R, Main)
+
+f(J, IfRead) = (J, IfRead, R, Translate)
+f(J, Blank) = (read, J, R, Main)
+
+f(K, IfRead) = (K, IfRead, R, Translate)
+f(K, Blank) = (read, K, R, Main)
+
+f(L, IfRead) = (L, IfRead, R, Translate)
+f(L, Blank) = (read, L, R, Main)
+
+f(M, IfRead) = (M, IfRead, R, Translate)
+f(M, Blank) = (read, M, R, Main)
+
+f(N, IfRead) = (N, IfRead, R, Translate)
+f(N, Blank) = (read, N, R, Main)
+
+f(O, IfRead) = (O, IfRead, R, Translate)
+f(O, Blank) = (read, O, R, Main)
+
+f(P, IfRead) = (P, IfRead, R, Translate)
+f(P, Blank) = (read, P, R, Main)
+
+f(Q, IfRead) = (Q, IfRead, R, Translate)
+f(Q, Blank) = (read, Q, R, Main)
+
+f(R, IfRead) = (R, IfRead, R, Translate)
+f(R, Blank) = (read, R, R, Main)
+
+f(S, IfRead) = (S, IfRead, R, Translate)
+f(S, Blank) = (read, S, R, Main)
+
+f(T, IfRead) = (T, IfRead, R, Translate)
+f(T, Blank) = (read, T, R, Main)
+
+f(U, IfRead) = (U, IfRead, R, Translate)
+f(U, Blank) = (read, U, R, Main)
+
+f(V, IfRead) = (V, IfRead, R, Translate)
+f(V, Blank) = (read, V, R, Main)
+
+f(W, IfRead) = (W, IfRead, R, Translate)
+f(W, Blank) = (read, W, R, Main)
+
+f(X, IfRead) = (X, IfRead, R, Translate)
+f(X, Blank) = (read, X, R, Main)
+
+f(Y, IfRead) = (Y, IfRead, R, Translate)
+f(Y, Blank) = (read, Y, R, Main)
+
+f(Z, IfRead) = (Z, IfRead, R, Translate)
+f(Z, Blank) = (read, Z, R, Main)
+
+
+
+
+
+
+
+% Teraz zistime pocet
+
+f(goBack, Skip) = (goBack,Skip,L,Main)
+f(goBack, Blank) = (readCounter, Blank, R, Main)
+
+f(readCounter, /) = (readCounter, /, R , Main)
+
+%Koncime Pocitanie
+f(readCounter, $) = (goLeftTranslateBlank, $ ,R, Translate)
+
+f(readCounter, . )=(addDot, .,R,CounterDot)
+f(readCounter, - )=(addLine, - ,R,CounterLine)
+
+f(addDot,Blank) = (readCounter, 1, R, Main)
+f(addLine,Blank) = (readCounter, 1, R, Main)
+
+f(MoveLeftDot, Blank) = (MoveLeftLine,Blank,L,CounterLine)
+f(MoveLeftLine, Blank) = (RemoveDot, Blank,L,CounterDot)
+
+f(RemoveDot, 1)=(RemoveLine, Blank,L, CounterLine)
+f(RemoveLine, 1)=(RemoveDot, Blank,L, CounterDot)
+
+f(RemoveDot, Blank) = (WriteLine, Blank,L,Main)
+f(WriteLine, Blank) = (RewriteLine, - , R, CounterLine)
+
+f(RemoveLine, Blank) = (WriteDot, Blank,L,Main)
+f(WriteDot, Blank) = (RewriteDot, . , R, CounterDot)
+
+f(RewriteDot, 1) = (WriteDotOne , Blank,L, Main)
+f(RewriteDot, Blank) = (END,Blank,L,Main)
+f(RewriteLine, 1) = (WriteDotLine , Blank,L, Main)
+f(RewriteLine, Blank) = (END,Blank,L,Main)
+
+f(WriteDotOne, Blank) = (RewriteDot, 1, R, CounterDot)
+f(WriteDotLine, Blank) = (RewriteLine, 1, R, CounterLine)
+
+
+
+%Prepiseme z pasky Translate na Koniec Main, Najprv ideme na lavo, pasky
+f(goLeftTranslateBlank, Blank) = (goLeftTranslate, Blank, L , Translate)
+f(goLeftTranslate,Alphabet) = (goLeftTranslate, Alphabet, L , Translate)
+f(goLeftTranslate, Blank) = (readTranslate, Blank, R, Translate)
+
+f(readTranslate, Blank) = (WriteEND, Blank, R, Main)
+f(WriteEND, Blank) = (MoveLeftDot,$,R, CounterDot)
+
+f(readTranslate, _)=(Write_,Blank, R, Main)
+f(Write_, Blank) = (readTranslate, _,R,Translate)
+
+
+f(readTranslate, A)=(WriteA,Blank, R, Main)
+f(WriteA, Blank) = (readTranslate, A,R,Translate)
+
+
+f(readTranslate, B)=(WriteB,Blank, R, Main)
+f(WriteB, Blank) = (readTranslate, B,R,Translate)
+
+
+f(readTranslate, C)=(WriteC,Blank, R, Main)
+f(WriteC, Blank) = (readTranslate, C,R,Translate)
+
+
+f(readTranslate, D)=(WriteD,Blank, R, Main)
+f(WriteD, Blank) = (readTranslate, D,R,Translate)
+
+f(readTranslate, E)=(WriteE,Blank, R, Main)
+f(WriteE, Blank) = (readTranslate, E,R,Translate)
+
+f(readTranslate, F)=(WriteF,Blank, R, Main)
+f(WriteF, Blank) = (readTranslate, F,R,Translate)
+
+f(readTranslate, G)=(WriteG,Blank, R, Main)
+f(WriteG, Blank) = (readTranslate, G,R,Translate)
+
+f(readTranslate, H)=(WriteH,Blank, R, Main)
+f(WriteH, Blank) = (readTranslate, H,R,Translate)
+
+f(readTranslate, I)=(WriteI,Blank, R, Main)
+f(WriteI, Blank) = (readTranslate, I,R,Translate)
+
+f(readTranslate, J)=(WriteJ,Blank, R, Main)
+f(WriteJ, Blank) = (readTranslate, J,R,Translate)
+
+f(readTranslate, K)=(WriteK,Blank, R, Main)
+f(WriteK, Blank) = (readTranslate, K,R,Translate)
+
+f(readTranslate, L)=(WriteL,Blank, R, Main)
+f(WriteL, Blank) = (readTranslate, L,R,Translate)
+
+f(readTranslate, M)=(WriteM,Blank, R, Main)
+f(WriteM, Blank) = (readTranslate, M,R,Translate)
+
+f(readTranslate, N)=(WriteN,Blank, R, Main)
+f(WriteN, Blank) = (readTranslate, N,R,Translate)
+
+f(readTranslate, O)=(WriteO,Blank, R, Main)
+f(WriteO, Blank) = (readTranslate, O,R,Translate)
+
+f(readTranslate, P)=(WriteP,Blank, R, Main)
+f(WriteP, Blank) = (readTranslate, P,R,Translate)
+
+f(readTranslate, Q)=(WriteQ,Blank, R, Main)
+f(WriteQ, Blank) = (readTranslate, Q,R,Translate)
+
+f(readTranslate, R)=(WriteR,Blank, R, Main)
+f(WriteR, Blank) = (readTranslate, R,R,Translate)
+
+f(readTranslate, S)=(WriteS,Blank, R, Main)
+f(WriteS, Blank) = (readTranslate, S,R,Translate)
+
+f(readTranslate, T)=(WriteT,Blank, R, Main)
+f(WriteT, Blank) = (readTranslate, T,R,Translate)
+
+f(readTranslate, U)=(WriteU,Blank, R, Main)
+f(WriteU, Blank) = (readTranslate, U,R,Translate)
+
+f(readTranslate, V)=(WriteV,Blank, R, Main)
+f(WriteV, Blank) = (readTranslate, V,R,Translate)
+
+f(readTranslate, W)=(WriteW,Blank, R, Main)
+f(WriteW, Blank) = (readTranslate, W,R,Translate)
+
+f(readTranslate, X)=(WriteX,Blank, R, Main)
+f(WriteX, Blank) = (readTranslate, X,R,Translate)
+
+f(readTranslate, Y)=(WriteY,Blank, R, Main)
+f(WriteY, Blank) = (readTranslate, Y,R,Translate)
+
+f(readTranslate, Z)=(WriteZ,Blank, R, Main)
+f(WriteZ, Blank) = (readTranslate, Z,R,Translate)
+
+f(END, Blank) = (END, Blank, 1, Main)
