@@ -121,19 +121,19 @@ public class AbacusMachine implements AutomatonEngine {
         this.halted = false;
         this.accepted = false;
 
-        ConsoleLogger.log.accept("Compiled " + program.size() + " instructions.");
+        ConsoleLogger.success("Compiled " + program.size() + " instructions.");
     }
 
     @Override
     public boolean step() {
         if (halted || iterator == null || !iterator.hasNext()) {
             halted = true;
-            ConsoleLogger.log.accept("Machine halted.");
+            ConsoleLogger.success("Machine halted.");
             return false;
         }
 
         current = iterator.next();
-        ConsoleLogger.log.accept("STEP: Executing " + current.getClass().getSimpleName());
+        ConsoleLogger.info("STEP: Executing " + current.getClass().getSimpleName());
         current.execute(this);
 
         ConsoleLogger.log.accept("State: " + registers);
@@ -141,7 +141,7 @@ public class AbacusMachine implements AutomatonEngine {
         if (!iterator.hasNext()) {
             halted = true;
             accepted = true;
-            ConsoleLogger.log.accept("Program finished. Accepted.");
+            ConsoleLogger.success("Program finished. Accepted.");
         }
 
         return true;
@@ -158,13 +158,13 @@ public class AbacusMachine implements AutomatonEngine {
             instr.reset();
         }
 
-        ConsoleLogger.log.accept("Machine reset.");
+        ConsoleLogger.info("Machine reset.");
     }
 
     @Override
     public void play() {
         reset();
-        ConsoleLogger.log.accept("Auto-play started.");
+        ConsoleLogger.info("Auto-play started.");
         if (running || halted) return;
 
         running = true;

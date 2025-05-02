@@ -1,10 +1,12 @@
 package Command;
 
+import Command.Abacus.AbacusMachine;
+import Command.Abacus.AbacusRender;
 import Command.Editor.*;
-import Command.Engine.AutomatonRenderer;
-import Command.Engine.AutomatonType;
-import Command.Engine.AutomatonEngine;
-import Command.Engine.SyntaxHighlighter;
+import Command.Engine.*;
+import Command.TuringMachine.TapePanelRender.DefaultTapePanelUpdater;
+import Command.TuringMachine.TuringMachine;
+import Command.TuringMachine.TuringMachineHighlighter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,16 +34,18 @@ public class TuringEditorUI extends JFrame implements ActionListener {
 
     AutomatonType type;
 
-    private List<List<String>> lastCompiledProgram = null;
     private String lastEditorText = "";
     private Timer autoRunTimer;
     private int autoRunDelay = 100;
 
-    public TuringEditorUI(String name, AutomatonEngine engine, AutomatonRenderer render, SyntaxHighlighter syntaxHighlighter) {
+    public TuringEditorUI(String name) {
         super("Turing Machine Editor");
-        type = new AutomatonType(name, engine,render,syntaxHighlighter);
-        this.console = new EmbeddedConsole(editorArea);
+        changeType(new String[]{"",name});
+        this.console = new EmbeddedConsole((JComponent) getContentPane(),this);
         ConsoleLogger.log = console::log;
+        ConsoleLogger.logColor = console::log;
+
+
         this.toolbar = new EditorToolBar(theme, this, themeManager);
         toolbar.getSpeedSlider().addChangeListener(e -> {
             int delay = toolbar.getSpeedSlider().getValue();
@@ -151,8 +155,9 @@ public class TuringEditorUI extends JFrame implements ActionListener {
             console.log("Compiled successfully.");
             JOptionPane.showMessageDialog(this, "Compilation successful.", "Compiled", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Compilation failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ConsoleLogger.error(ex.getMessage());
+            if(!console.isVisible())
+                console.toggle();
         }
     }
 
@@ -248,4 +253,45 @@ public class TuringEditorUI extends JFrame implements ActionListener {
             case "Guide" -> onGuide();
         }
     }
+
+
+    public void changeType(String[] arguments) {
+        AutomatonTypeBundle bundle = switch (arguments[1]) {
+            case "turingmachine" -> new AutomatonTypeBundle(
+                    "TuringMachine",
+                    new TuringMachine(0),
+                    new DefaultTapePanelUpdater(),
+                    new TuringMachineHighlighter()
+            );
+            case "abacus" -> new AutomatonTypeBundle(
+                    "Abacus",
+                    new AbacusMachine(),
+                    new AbacusRender(),
+                    new TuringMachineHighlighter() // You may want to swap this for an AbacusHighlighter later
+            );
+            default ->  throw new IllegalStateException("Unknown engine type: " + arguments[1]);
+        };
+        ConsoleLogger.success("Automaton Type switch succesful to: " + bundle.name);
+        this.type = new AutomatonType(bundle.name, bundle.engine, bundle.renderer, bundle.highlighter);
+    }
+
+    public void compile() {
+        onCompile(null);
+    }
+
+    public void play() {
+        onPlay(null);
+    }
+
+    public void reset() {
+        onReset(null);
+    }
+    public void step(int count){
+        while(count!=0){
+            onStep(null);
+            count--;
+        }
+    }
+
+    public void stop(){ if (autoRunTimer != null) autoRunTimer.stop(); }
 }

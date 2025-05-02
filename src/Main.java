@@ -17,10 +17,8 @@ class Main{
         }
 
         SwingUtilities.invokeLater(() -> new TuringEditorUI(
-                "TuringMachine",
-                new AbacusMachine(),
-                new AbacusRender(),
-                new TuringMachineHighlighter()
+                "turingmachine"
+
         ));
     }
 }

@@ -18,17 +18,17 @@ public class LoopInstruction implements Instruction {
     @Override
     public void execute(AbacusMachine machine) {
         int value = machine.getRegisters().getOrDefault(register, 0);
-        ConsoleLogger.log.accept("LOOP r" + register + " = " + value);
+        ConsoleLogger.info("LOOP r" + register + " = " + value);
 
         while (value != 0) {
             for (Instruction instr : body) {
                 instr.execute(machine);
             }
             value = machine.getRegisters().getOrDefault(register, 0);
-            ConsoleLogger.log.accept("LOOP r" + register + " = " + value);
+            ConsoleLogger.info("LOOP r" + register + " = " + value);
         }
 
-        ConsoleLogger.log.accept("EXIT LOOP r" + register);
+        ConsoleLogger.success("EXIT LOOP r" + register);
     }
 
 
