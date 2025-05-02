@@ -2,6 +2,7 @@ package Command.Abacus.Instruction;
 
 import Command.Abacus.AbacusMachine;
 import Command.Abacus.Instruction.Instruction;
+import Command.Editor.ConsoleLogger;
 
 public class DecInstruction implements Instruction {
     private final int register;
@@ -12,11 +13,13 @@ public class DecInstruction implements Instruction {
 
     @Override
     public void execute(AbacusMachine machine) {
-        int value = machine.registers.getOrDefault(register, 0);
-        if (value > 0) {
-            machine.registers.put(register, value - 1);
+        int before = machine.registers.getOrDefault(register, 0);
+        if (before > 0) {
+            machine.registers.put(register, before - 1);
+            ConsoleLogger.log.accept("DEC r" + register + ": " + before + " → " + (before - 1));
+        } else {
+            ConsoleLogger.log.accept("DEC r" + register + ": skipped (already 0)");
         }
-        machine.pc++;
     }
 
     @Override

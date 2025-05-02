@@ -1,14 +1,14 @@
 package Command.Abacus.Instruction;
 
 import Command.Abacus.AbacusMachine;
-import Command.Abacus.Instruction.Instruction;
+import Command.Editor.ConsoleLogger;
 
 import java.util.List;
 
 public class LoopInstruction implements Instruction {
     private final int register;
     private final List<Instruction> body;
-    private int loopPc = 0;  // internal program counter
+    private int loopPc = 0;
 
     public LoopInstruction(int register, List<Instruction> body) {
         this.register = register;
@@ -17,35 +17,30 @@ public class LoopInstruction implements Instruction {
 
     @Override
     public void execute(AbacusMachine machine) {
-        while (loopPc < body.size()) {
-            Instruction inst = body.get(loopPc);
-            inst.execute(machine);
+        int value = machine.getRegisters().getOrDefault(register, 0);
+        ConsoleLogger.log.accept("LOOP r" + register + " = " + value);
 
-            // Only step forward if that instruction is "done"
-            if (inst.isDone()) {
-                loopPc++;
-            } else {
-                break;
+        while (value != 0) {
+            for (Instruction instr : body) {
+                instr.execute(machine);
             }
-            return; // yield control
+            value = machine.getRegisters().getOrDefault(register, 0);
+            ConsoleLogger.log.accept("LOOP r" + register + " = " + value);
         }
 
-        // loopPc reached end of body
-        if (machine.registers.getOrDefault(register, 0) != 0) {
-            loopPc = 0; // repeat loop
-        } else {
-            machine.pc++;  // exit loop
-        }
+        ConsoleLogger.log.accept("EXIT LOOP r" + register);
     }
+
 
     @Override
     public boolean isDone() {
-        return false; // will be handled through outer machine pc
+        return false; // a loop is never "done" until its controlling register hits 0
     }
 
     @Override
     public void reset() {
-        loopPc = 0;
-        for (Instruction i : body) i.reset();
+        for (Instruction instr : body) {
+            instr.reset();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package Command.Abacus.Instruction;
 
 import Command.Abacus.AbacusMachine;
+import Command.Editor.ConsoleLogger;
 
 public class IncInstruction implements Instruction {
     private final int register;
@@ -11,8 +12,9 @@ public class IncInstruction implements Instruction {
 
     @Override
     public void execute(AbacusMachine machine) {
-        machine.registers.put(register, machine.registers.getOrDefault(register, 0) + 1);
-        machine.pc++;
+        int value = machine.registers.getOrDefault(register, 0);
+        machine.registers.put(register, value + 1);
+        ConsoleLogger.log.accept("INC r" + register + ": " + value + " → " + (value + 1));
     }
 
     @Override

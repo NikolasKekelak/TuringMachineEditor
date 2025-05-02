@@ -17,6 +17,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
     private JScrollPane editorScroll;
     private JScrollPane tapeScroll;
     private boolean isRunning = false;
+    public final EmbeddedConsole console;
 
 
     private final ThemeManager themeManager = new ThemeManager();
@@ -39,6 +40,8 @@ public class TuringEditorUI extends JFrame implements ActionListener {
     public TuringEditorUI(String name, AutomatonEngine engine, AutomatonRenderer render, SyntaxHighlighter syntaxHighlighter) {
         super("Turing Machine Editor");
         type = new AutomatonType(name, engine,render,syntaxHighlighter);
+        this.console = new EmbeddedConsole(editorArea);
+        ConsoleLogger.log = console::log;
         this.toolbar = new EditorToolBar(theme, this, themeManager);
         toolbar.getSpeedSlider().addChangeListener(e -> {
             int delay = toolbar.getSpeedSlider().getValue();
@@ -96,6 +99,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
 
 
         add(controlPanel);
+        controlPanel.add(console.getComponent(), BorderLayout.SOUTH);
         applyTheme();
         setVisible(true);
     }
@@ -144,6 +148,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
             type.engine.compile(code);
             lastEditorText = code;
             updateTapePanel();
+            console.log("Compiled successfully.");
             JOptionPane.showMessageDialog(this, "Compilation successful.", "Compiled", JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -154,7 +159,12 @@ public class TuringEditorUI extends JFrame implements ActionListener {
     private void onStep(ActionEvent e) {
         try {
             if (!type.engine.step()) {
+                System.out.println("HALTED: " + type.engine.getCurrentStatus());
+                autoRunTimer.stop();
+                isRunning = false;
                 JOptionPane.showMessageDialog(this, "Machine has halted.");
+            } else {
+                System.out.println("STEP: " + type.engine.getCurrentStatus());
             }
             updateTapePanel();
         } catch (Exception ex) {
