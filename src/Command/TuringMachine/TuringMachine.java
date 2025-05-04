@@ -1,6 +1,8 @@
 package Command.TuringMachine;
 
+import Command.Editor.ConsoleLogger;
 import Command.Engine.AutomatonEngine;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,6 +20,7 @@ public class TuringMachine implements AutomatonEngine {
 
     public TuringMachine(int initialState) {
         this.currentStateIndex = initialState;
+        ConsoleLogger.info("TuringMachine initialized with initial state: " + initialState);
     }
 
     @Override
@@ -34,6 +37,7 @@ public class TuringMachine implements AutomatonEngine {
         stateCounter = 0;
         halted = false;
         accepted = false;
+        ConsoleLogger.info("Compiling Turing Machine...");
 
         for (List<String> line : lines) {
             if (line.isEmpty()) continue;
@@ -49,10 +53,12 @@ public class TuringMachine implements AutomatonEngine {
                         tape = new Tape(10000, splitToList(line.get(2)));
                     }
                     tapes.put(tapeName, tape);
+                    ConsoleLogger.success("Tape '" + tapeName + "' initialized.");
                     if ("Main".equals(tapeName)) currentTape = tape;
                 }
                 case "f" -> {
-                    if (line.size() < 7) throw new IllegalArgumentException("Invalid rule definition.");
+                    if (line.size() < 7)
+                        throw new IllegalArgumentException("Invalid rule definition.");
                     String fromState = line.get(1);
                     List<String> read = sets.getOrDefault(line.get(2), List.of(line.get(2)));
                     List<String> write = sets.getOrDefault(line.get(4), List.of(line.get(4)));
@@ -65,12 +71,14 @@ public class TuringMachine implements AutomatonEngine {
                     if (type.startsWith("#")) {
                         String setName = type.substring(1);
                         sets.put(setName, line.subList(1, line.size()));
+                        ConsoleLogger.info("Defined set #" + setName + ": " + sets.get(setName));
                     } else {
                         throw new IllegalArgumentException("Invalid line: " + line);
                     }
                 }
             }
         }
+        ConsoleLogger.success("Compilation finished. Resetting machine...");
         reset();
     }
 
@@ -84,12 +92,17 @@ public class TuringMachine implements AutomatonEngine {
             states.add(new State(states.size()));
         }
 
-        states.get(fromIdx).addRule(new Command(read, write, toIdx, move, nextTape));
+        Command command = new Command(read, write, toIdx, move, nextTape);
+        states.get(fromIdx).addRule(command);
+        ConsoleLogger.info("Added rule: " + from + " [" + read + "] -> " + to + " [" + write + "], move: " + move + ", tape: " + nextTape);
     }
 
     @Override
     public boolean step() {
-        if (halted) return false;
+        if (halted) {
+            ConsoleLogger.warn("Machine is already halted.");
+            return false;
+        }
 
         String current = currentTape.getCurrent();
         Command command = states.get(currentStateIndex).getCommand(current);
@@ -98,6 +111,8 @@ public class TuringMachine implements AutomatonEngine {
         int writeIndex = (command.write.size() > 1) ? index : 0;
 
         currentTape.setCurrent(command.write.get(writeIndex));
+        ConsoleLogger.info("State " + getCurrentState() + ": read '" + current + "', wrote '" + command.write.get(writeIndex) + "'.");
+
         currentStateIndex = command.nextState;
 
         switch (command.move) {
@@ -107,17 +122,20 @@ public class TuringMachine implements AutomatonEngine {
             case "0" -> {
                 halted = true;
                 accepted = false;
+                ConsoleLogger.error("Machine halted with rejection.");
                 return false;
             }
             case "1" -> {
                 halted = true;
                 accepted = true;
+                ConsoleLogger.success("Machine halted with acceptance.");
                 return false;
             }
             default -> throw new IllegalStateException("Unknown move: " + command.move);
         }
 
         currentTape = tapes.get(command.nextTape);
+        ConsoleLogger.info("Switched to tape: " + getCurrentTapeName());
         return true;
     }
 
@@ -128,16 +146,19 @@ public class TuringMachine implements AutomatonEngine {
         currentTape = tapes.get("Main");
         halted = false;
         accepted = false;
+        ConsoleLogger.success("Machine has been reset.");
     }
 
     @Override
     public void play() {
+        ConsoleLogger.info("Starting execution...");
         while (!halted) step();
     }
 
     @Override
     public void stop() {
         halted = true;
+        ConsoleLogger.warn("Machine manually stopped.");
     }
 
     @Override
@@ -159,51 +180,9 @@ public class TuringMachine implements AutomatonEngine {
     public String getGuide() {
         return """
         Turing Machine Language Guide:
-
-        % --- Comments start with % or //
-        
-        # --- Sets (define groups of symbols):
-        #digits 0 1 2 3 4 5 6 7 8 9
-
-        tape Main            // Define a tape named 'Main'
-        tape Name initialWord // Optional starting contents
-
-        f fromState read -> toState write move tapeName
-          - fromState: Current state
-          - read: Expected symbol(s) to read (or a set)
-          - toState: Next state to move to
-          - write: Symbol(s) to write (or a set)
-          - move: 
-              'R' - move head right
-              'L' - move head left
-              '-' - don't move
-              '0' - halt and reject
-              '1' - halt and accept
-          - tapeName: Which tape to switch to after move
-
-        Example Programs You Can Run:
-             
-            % Always declare a Main tape, in this case on tape will be
-            % 0110 
-            tape Main = {0110}
-            
-            % in state q0 if you read 0 go to state q1 
-            %and change read 0 to 1
-            f( q0, 0) = ( q1, 1, R)
-            f( q1, 1) = ( q0, 0, R)
-            
-            f( q1, Blank ) = ( End, Blank, 1) 
-            f( q0, Blank )= ( End, Blank, 0) 
-
-        Notes:
-          - 'Blank' refers to an empty tape cell.
-          - 'Main' is the default active tape.
-          - State and Tape names are case-sensitive.
-          - Sets (like #digits) can be used inside rules.
-
+        ...
         """;
     }
-
 
     public String getCurrentState() {
         for (Map.Entry<String, Integer> entry : stateMap.entrySet()) {

@@ -45,7 +45,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
         this.console = new EmbeddedConsole((JComponent) getContentPane(),this);
         ConsoleLogger.log = console::log;
         ConsoleLogger.logColor = console::log;
-
+        console.toggle();
 
         this.toolbar = new EditorToolBar(theme, this, themeManager);
         toolbar.getSpeedSlider().addChangeListener(e -> {
@@ -153,8 +153,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
             type.engine.compile(code);
             lastEditorText = code;
             updateTapePanel();
-            console.log("Compiled successfully.");
-            JOptionPane.showMessageDialog(this, "Compilation successful.", "Compiled", JOptionPane.INFORMATION_MESSAGE);
+            ConsoleLogger.success("Compiled successfully.");
         } catch (Exception ex) {
             ConsoleLogger.error(ex.getMessage());
             if(!console.isVisible())
@@ -165,16 +164,13 @@ public class TuringEditorUI extends JFrame implements ActionListener {
     private void onStep(ActionEvent e) {
         try {
             if (!type.engine.step()) {
-                System.out.println("HALTED: " + type.engine.getCurrentStatus());
                 autoRunTimer.stop();
                 isRunning = false;
-                JOptionPane.showMessageDialog(this, "Machine has halted.");
-            } else {
-                System.out.println("STEP: " + type.engine.getCurrentStatus());
+                ConsoleLogger.success("Machine has halted.");
             }
             updateTapePanel();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Step failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ConsoleLogger.error("Step failed: " + ex.getMessage());
         }
     }
 
@@ -201,7 +197,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
                     if (!type.engine.step()) {
                         autoRunTimer.stop();
                         isRunning = false;
-                        JOptionPane.showMessageDialog(this, "Machine has halted.");
+                        ConsoleLogger.success("Machine has halted.");
                     }
                     updateTapePanel();
                 } catch (Exception ex) {
