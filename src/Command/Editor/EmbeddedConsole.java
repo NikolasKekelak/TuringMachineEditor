@@ -128,10 +128,25 @@ public class EmbeddedConsole {
                 editor.play();
             }
             case "stop" -> editor.stop();
+            case "guide" ->editor.guide();
             case "console" -> consoleCommand(arguments);
+            case "theme" -> {
+                if (arguments.length == 1) {
+                    log(" Available themes: ", Color.CYAN);
+                    for (String name : editor.getThemes()) {
+                        ConsoleLogger.info("  " + name);
+                    }
+                } else if (arguments.length == 2) {
+                    editor.changeTheme(arguments[1]);
+                } else if (arguments.length == 3) {
+                    editor.changeTheme(arguments[1] + " " + arguments[2]);
+                }
+            }
             case "help" -> {
                 log("Available commands:", Color.CYAN);
                 log("  switchto [turingmachine|abacus]", Color.CYAN);
+                log("  console [clear]", Color.CYAN);
+                log("  play,clear,reset,replay,stop", Color.CYAN);
                 log("  help", Color.CYAN);
             }
             default -> throw new IllegalArgumentException("Unknown command: " + arguments[0]);

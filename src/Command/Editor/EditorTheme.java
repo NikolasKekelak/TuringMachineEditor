@@ -395,6 +395,34 @@ public class EditorTheme {
         this.editorFont = other.editorFont; // optionally clone font if needed
     }
 
+    public void setGoldenSunset() {
+        background = new Color(25, 20, 10); // Deep brown-black
+        panelBackground = new Color(40, 30, 15);
+        editorBackground = new Color(50, 35, 20);
+        editorForeground = new Color(255, 215, 0); // Golden text
+
+        tapeBackground = new Color(60, 40, 25);
+        selectedTapeBackground = new Color(100, 80, 20);
+        selectedTapeBorderColor = new Color(255, 215, 0); // Gold border
+
+        toolbarBackground = new Color(45, 30, 15);
+        buttonBackground = new Color(70, 50, 25);
+        buttonForeground = new Color(255, 223, 90); // Soft gold
+        buttonBorderColor = new Color(255, 200, 0);
+
+        tapeBorderColor = new Color(160, 120, 40);
+        tapeTextColor = new Color(255, 215, 0); // Golden tape text
+        selectedCellBackground = new Color(255, 215, 0); // Highlight gold
+        selectedCellForeground = new Color(20, 10, 5); // Dark text inside gold
+
+        currentStateTextColor = new Color(255, 230, 120); // Light gold
+
+        cellBorderColor = new Color(255, 200, 0);
+        editorFont = new Font("JetBrains Mono", Font.BOLD, 14);
+
+        scrollbarThumb = new Color(255, 200, 0);
+        scrollbarTrack = new Color(50, 30, 10);
+    }
 
 
 }

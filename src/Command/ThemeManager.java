@@ -29,6 +29,7 @@ public class ThemeManager {
         EditorTheme forest = new EditorTheme(); forest.setForestGreen(); themes.put("Forest Green", forest);
         EditorTheme retro = new EditorTheme(); retro.setRetroTerminal(); themes.put("Retro Terminal", retro);
         EditorTheme bloody = new EditorTheme(); bloody.setBloodyRed(); themes.put("Bloody Red", bloody);
+        EditorTheme golden = new EditorTheme(); golden.setGoldenSunset(); themes.put("Golden Sunset", golden);
 
     }
 

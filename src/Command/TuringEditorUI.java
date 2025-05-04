@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.Set;
 
 public class TuringEditorUI extends JFrame implements ActionListener {
 
@@ -293,5 +294,13 @@ public class TuringEditorUI extends JFrame implements ActionListener {
         }
     }
 
+    public void guide (){
+        onGuide();
+    }
+
     public void stop(){ if (autoRunTimer != null) autoRunTimer.stop(); }
+
+    public Set<String> getThemes(){
+        return themeManager.getThemeNames();
+    }
 }

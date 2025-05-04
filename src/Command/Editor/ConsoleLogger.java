@@ -24,4 +24,6 @@ public class ConsoleLogger {
         logColor.accept(msg, Color.RED);
     }
 
+    public static void logColor(String s, Color cyan) {
+    }
 }

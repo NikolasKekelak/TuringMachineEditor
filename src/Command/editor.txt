@@ -158,9 +158,9 @@ f(RemoveLine, Blank) = (WriteDot, Blank,L,Main)
 f(WriteDot, Blank) = (RewriteDot, . , R, CounterDot)
 
 f(RewriteDot, 1) = (WriteDotOne , Blank,L, Main)
-f(RewriteDot, Blank) = (END,Blank,L,Main)
+f(RewriteDot, Blank) = (CheckIfEqual,Blank,L,Main)
 f(RewriteLine, 1) = (WriteDotLine , Blank,L, Main)
-f(RewriteLine, Blank) = (END,Blank,L,Main)
+f(RewriteLine, Blank) = (CheckIfEqual,Blank,L,Main)
 
 f(WriteDotOne, Blank) = (RewriteDot, 1, R, CounterDot)
 f(WriteDotLine, Blank) = (RewriteLine, 1, R, CounterLine)
@@ -260,4 +260,11 @@ f(WriteY, Blank) = (readTranslate, Y,R,Translate)
 f(readTranslate, Z)=(WriteZ,Blank, R, Main)
 f(WriteZ, Blank) = (readTranslate, Z,R,Translate)
 
-f(END, Blank) = (END, Blank, 1, Main)
+
+f(CheckIfEqual, Blank) = (CheckIfEqual,Blank, L, Main)
+f(CheckIfEqual, 1) = (END, 1,R,Main)
+f(CheckIfEqual, -) = (WriteDotEnd, -,R,Main)
+f(WriteDotEnd, Blank) = (END, . ,R, Main)
+
+
+f(END, Blank) = (END, Blank, 1 , Main)
