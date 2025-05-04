@@ -71,6 +71,7 @@ public class TuringMachine implements AutomatonEngine {
                 }
             }
         }
+        reset();
     }
 
     private void addRule(String from, List<String> read, List<String> write, String to, String move, String nextTape) {
