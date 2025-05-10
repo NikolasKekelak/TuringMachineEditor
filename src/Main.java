@@ -1,12 +1,6 @@
 import javax.swing.*;
 
-import Command.Abacus.AbacusMachine;
-import Command.Abacus.AbacusRender;
-import Command.TuringMachine.TapePanelRender.DefaultTapePanelUpdater;
-import Command.TuringEditorUI;
-import Command.TuringMachine.TapePanelRender.FancyTapeRenderer;
-import Command.TuringMachine.TuringMachine;
-import Command.TuringMachine.TuringMachineHighlighter;
+import Editor.TuringEditorUI;
 
 class Main{
     public static void main(String[] args) {
