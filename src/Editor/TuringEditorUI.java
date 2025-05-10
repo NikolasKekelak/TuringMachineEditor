@@ -2,6 +2,7 @@ package Editor;
 
 import Editor.Abacus.AbacusMachine;
 import Editor.Abacus.AbacusRender;
+import Editor.Automatas.TuringMachine.TuringMachineValidator;
 import Editor.Editor.*;
 import Editor.Engine.*;
 import Editor.Automatas.TuringMachine.TapePanelRender.DefaultTapePanelUpdater;
@@ -171,6 +172,8 @@ public class TuringEditorUI extends JFrame implements ActionListener {
 
     private void onCompile(ActionEvent e) {
         highlighterWorker.forceHighlight();
+
+        TuringMachineValidator.validate(editorArea);
         try {
             String code = editorArea.getText();
             type.engine.compile(code);

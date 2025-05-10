@@ -3,61 +3,50 @@ package Editor.Automatas.TuringMachine;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TuringMachineValidator {
 
-    private final JTextPane editorPane;
-    private final Highlighter highlighter;
-    private final ArrayList<Object> highlights = new ArrayList<>();
+    private static final Color ERROR_COLOR = new Color(255, 100, 150); // soft red/pink
 
-    public TuringMachineValidator(JTextPane editorPane) {
-        this.editorPane = editorPane;
-        this.highlighter = editorPane.getHighlighter();
+    public static void validate(JTextPane editorPane) {
+        StyledDocument doc = editorPane.getStyledDocument();
+        removeAllTooltips(editorPane); // optional, resets last session
+
+        try {
+            String text = doc.getText(0, doc.getLength());
+            String[] lines = text.split("\n");
+            int offset = 0;
+
+            for (String line : lines) {
+                String trimmed = line.trim();
+
+                if (trimmed.startsWith("tape") && !line.contains("=")) {
+                    markError(doc, offset, line.length(), "Missing '=' in tape definition");
+                } else if (trimmed.startsWith("#set") && (!line.contains("=") || !line.contains("{") || !line.contains("}"))) {
+                    markError(doc, offset, line.length(), "Set definition must contain '=', '{' and '}'");
+                } else if (trimmed.startsWith("f(")) {
+                    if (!line.contains("=") || !line.contains("(") || !line.contains(")")) {
+                        markError(doc, offset, line.length(), "Malformed transition rule: expect f(...) = (...)");
+                    }
+                }
+
+                offset += line.length() + 1;
+            }
+
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void validate() {
-        // Clear existing highlights
-        for (Object tag : highlights) highlighter.removeHighlight(tag);
-        highlights.clear();
+    private static void markError(StyledDocument doc, int offset, int length, String message) {
+        Style style = doc.addStyle("error", null);
+        StyleConstants.setUnderline(style, true);
+        StyleConstants.setForeground(style, ERROR_COLOR);
+        doc.setCharacterAttributes(offset, length, style, true);
+        // Tooltip isn't native here – handled elsewhere if needed
+    }
 
-        String text = editorPane.getText();
-        String[] lines = text.split("\n");
-        int offset = 0;
-
-        for (String line : lines) {
-            String trimmed = line.trim();
-            String error = null;
-
-            if (trimmed.startsWith("tape")) {
-                if (!trimmed.contains("=") || !trimmed.contains("{")) {
-                    error = "Tape declaration missing '=' or '{...}'";
-                }
-            } else if (trimmed.startsWith("#set")) {
-                if (!trimmed.contains("=") || !trimmed.contains("{") || !trimmed.contains("}")) {
-                    error = "Set declaration malformed. Expected format: #set = {a, b, ...}";
-                }
-            } else if (trimmed.startsWith("f(")) {
-                if (!trimmed.contains("=") || !trimmed.contains(")") || !trimmed.contains("(")) {
-                    error = "Transition rule malformed. Expected format: f(state, symbol) = (...)";
-                }
-            }
-
-            if (error != null) {
-                try {
-                    int start = offset;
-                    int end = offset + line.length();
-                    Object tag = highlighter.addHighlight(start, end, new DefaultHighlighter.DefaultHighlightPainter(Color.PINK));
-                    highlights.add(tag);
-                    editorPane.setToolTipText(error); // Optional: You may want custom hover logic per line
-                } catch (BadLocationException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            offset += line.length() + 1;
-        }
+    private static void removeAllTooltips(JTextPane pane) {
+        // Clear logic (you can reset attributes here if you cache original styles)
     }
 }
