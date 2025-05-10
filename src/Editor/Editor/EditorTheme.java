@@ -33,10 +33,6 @@ public class EditorTheme {
     public Color currentStateTextColor;
 
     public EditorTheme() {
-        keywordColor = new Color(200, 120, 50);  // orange-ish
-        commentColor = new Color(100, 255, 100); // light green
-        setColor = new Color(80, 160, 255);      // light blue
-        stateColor = new Color(255, 200, 0);     // yellow  // Default is dark theme
         setDefault();
     }
 
@@ -66,6 +62,10 @@ public class EditorTheme {
 
         scrollbarThumb = new Color(120, 120, 120);
         scrollbarTrack = new Color(200, 200, 200);
+        keywordColor = new Color(200, 120, 50);  // orange-ish
+        commentColor = new Color(100, 255, 100); // light green
+        setColor = new Color(80, 160, 255);      // light blue
+        stateColor = new Color(255, 200, 0);     // yellow  // Default is dark theme
     }
 
     public void copyFrom(EditorTheme other) {
@@ -89,6 +89,12 @@ public class EditorTheme {
         this.selectedCellBackground = other.selectedCellBackground;
         this.selectedCellForeground = other.selectedCellForeground;
         this.currentStateTextColor = other.currentStateTextColor;
+
+
+        this.keywordColor = other.keywordColor;
+        this.commentColor = other.commentColor;
+        this.setColor     = other.setColor;
+        this.stateColor   = other.stateColor;
 
         this.editorFont = other.editorFont; // optionally clone font if needed
     }

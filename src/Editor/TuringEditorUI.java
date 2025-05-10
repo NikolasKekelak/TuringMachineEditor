@@ -127,8 +127,17 @@ public class TuringEditorUI extends JFrame implements ActionListener {
         if (loadedTheme != null) {
             this.theme.copyFrom(loadedTheme);
             applyTheme();
+
+            if (type != null && type.syntaxHighlighter != null) {
+                type.syntaxHighlighter.setTheme(this.theme);
+                type.syntaxHighlighter.applyTheme(this.theme);
+                if (highlighterWorker != null) {
+                    highlighterWorker.forceHighlight();
+                }
+            }
         }
     }
+
 
     private void applyTheme() {
         editorArea.setBackground(theme.editorBackground);
