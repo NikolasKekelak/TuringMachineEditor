@@ -38,7 +38,7 @@ public class TuringMachineHighlighter implements SyntaxHighlighter {
 
         try {
             String text = doc.getText(offset, length);
-            doc.setCharacterAttributes(offset, length, defaultStyle, true); // reset to default
+            doc.setCharacterAttributes(offset, length, defaultStyle, true); // Reset to default
 
             String[] lines = text.split("\n");
             int lineOffset = offset;
@@ -46,20 +46,80 @@ public class TuringMachineHighlighter implements SyntaxHighlighter {
             for (String line : lines) {
                 String trimmed = line.trim();
 
+                // % comment
                 if (trimmed.startsWith("%")) {
                     doc.setCharacterAttributes(lineOffset, line.length(), commentStyle, true);
-                } else if (trimmed.startsWith("tape") || trimmed.startsWith("f") || trimmed.startsWith("state")) {
-                    highlightKeywordLine(doc, line, lineOffset);
-                } else if (trimmed.startsWith("#")) {
-                    doc.setCharacterAttributes(lineOffset, line.length(), setStyle, true);
                 }
 
-                lineOffset += line.length() + 1; // +1 for newline
+                // tape NAME = {...}
+                else if (trimmed.matches("^tape\\s+\\w+\\s*=\\s*\\{[^}]*\\}")) {
+                    int tapeIdx = line.indexOf("tape");
+                    doc.setCharacterAttributes(lineOffset + tapeIdx, 4, keywordStyle, true);
+
+                    int eqIdx = line.indexOf("=");
+                    if (eqIdx != -1)
+                        doc.setCharacterAttributes(lineOffset + eqIdx, 1, keywordStyle, true);
+
+                    int lbrace = line.indexOf("{");
+                    int rbrace = line.indexOf("}");
+                    if (lbrace != -1)
+                        doc.setCharacterAttributes(lineOffset + lbrace, 1, keywordStyle, true);
+                    if (rbrace != -1)
+                        doc.setCharacterAttributes(lineOffset + rbrace, 1, keywordStyle, true);
+                }
+
+                // #set = {...}
+                else if (trimmed.matches("^#set\\s*=\\s*\\{[^}]*\\}")) {
+                    int hashIdx = line.indexOf("#");
+                    doc.setCharacterAttributes(lineOffset + hashIdx, 1, setStyle, true);
+
+                    int setIdx = line.indexOf("set");
+                    doc.setCharacterAttributes(lineOffset + setIdx, 3, setStyle, true);
+
+                    int eqIdx = line.indexOf("=");
+                    if (eqIdx != -1)
+                        doc.setCharacterAttributes(lineOffset + eqIdx, 1, keywordStyle, true);
+
+                    int lbrace = line.indexOf("{");
+                    int rbrace = line.indexOf("}");
+                    if (lbrace != -1)
+                        doc.setCharacterAttributes(lineOffset + lbrace, 1, keywordStyle, true);
+                    if (rbrace != -1)
+                        doc.setCharacterAttributes(lineOffset + rbrace, 1, keywordStyle, true);
+                }
+
+                // rule: f(...) = (...)
+                else if (trimmed.matches("^f\\s*\\([^)]*\\)\\s*=\\s*\\([^)]*\\)")) {
+                    int fIdx = line.indexOf("f");
+                    doc.setCharacterAttributes(lineOffset + fIdx, 1, keywordStyle, true);
+
+                    int lpar1 = line.indexOf("(");
+                    int rpar1 = line.indexOf(")");
+                    if (lpar1 != -1)
+                        doc.setCharacterAttributes(lineOffset + lpar1, 1, keywordStyle, true);
+                    if (rpar1 != -1)
+                        doc.setCharacterAttributes(lineOffset + rpar1, 1, keywordStyle, true);
+
+                    int eqIdx = line.indexOf("=", rpar1);
+                    if (eqIdx != -1)
+                        doc.setCharacterAttributes(lineOffset + eqIdx, 1, keywordStyle, true);
+
+                    int lpar2 = line.indexOf("(", eqIdx);
+                    int rpar2 = line.lastIndexOf(")");
+                    if (lpar2 != -1)
+                        doc.setCharacterAttributes(lineOffset + lpar2, 1, keywordStyle, true);
+                    if (rpar2 != -1)
+                        doc.setCharacterAttributes(lineOffset + rpar2, 1, keywordStyle, true);
+                }
+
+                lineOffset += line.length() + 1;
             }
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
     }
+
+
 
     private void highlightKeywordLine(StyledDocument doc, String line, int offset) throws BadLocationException {
         String[] tokens = line.split("\\s+");
