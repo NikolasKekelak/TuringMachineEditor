@@ -120,6 +120,15 @@ public class TuringEditorUI extends JFrame implements ActionListener {
         add(controlPanel);
         controlPanel.add(console.getComponent(), BorderLayout.SOUTH);
         applyTheme();
+
+        setUndecorated(true);
+
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(new CustomTitleBar(this, theme, "Turing Machine Editor"));
+        topPanel.add(toolbar);
+        controlPanel.add(topPanel, BorderLayout.NORTH);
+
         setVisible(true);
     }
 
