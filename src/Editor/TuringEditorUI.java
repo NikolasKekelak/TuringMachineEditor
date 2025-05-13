@@ -46,7 +46,6 @@ public class TuringEditorUI extends JFrame implements ActionListener {
         this.console = new EmbeddedConsole((JComponent) getContentPane(),this);
         ConsoleLogger.log = console::log;
         ConsoleLogger.logColor = console::log;
-        console.toggle();
 
         this.toolbar = new EditorToolBar(theme, this, themeManager);
         toolbar.getSpeedSlider().addChangeListener(e -> {
@@ -95,6 +94,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
         // Set theme first!
         changeTheme(sessionManager.getLastTheme()); // This internally calls setTheme + applyTheme
 
+        /*
         // Now safe to use highlighter
         type.syntaxHighlighter.setTheme(this.theme);
         type.syntaxHighlighter.applyTheme(this.theme);
@@ -103,6 +103,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
 
         highlighterWorker = new SyntaxHighlightingWorker(editorArea, type.syntaxHighlighter);
         highlighterWorker.forceHighlight();
+        */
 
         toolbar.getThemeSelector().setSelectedItem(sessionManager.getLastTheme());
         changeTheme(sessionManager.getLastTheme());
@@ -180,7 +181,7 @@ public class TuringEditorUI extends JFrame implements ActionListener {
     }
 
     private void onCompile(ActionEvent e) {
-        highlighterWorker.forceHighlight();
+        //highlighterWorker.forceHighlight()
 
         TuringMachineValidator.validate(editorArea);
         try {

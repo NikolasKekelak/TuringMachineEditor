@@ -2,139 +2,110 @@ package Editor.Editor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.awt.event.WindowEvent;
 
 public class CustomTitleBar extends JPanel {
     private Point initialClick;
+    private boolean isMaximized = false;
+    private Rectangle savedBounds;
 
     public CustomTitleBar(JFrame frame, EditorTheme theme, String titleText) {
         setLayout(new BorderLayout());
-        setBackground(new Color(43, 43, 43)); // IntelliJ-like gray
+        setBackground(new Color(43, 43, 43)); // Darker title bar
+        setPreferredSize(new Dimension(frame.getWidth(), 48)); // Thicker
 
         JLabel title = new JLabel("  " + titleText);
         title.setForeground(Color.LIGHT_GRAY);
-        title.setFont(new Font("Dialog", Font.BOLD, 13));
+        title.setFont(new Font("Dialog", Font.BOLD, 16));
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 2));
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 4));
         buttons.setOpaque(false);
-        buttons.add(createMinimizeButton(frame));
-        buttons.add(createMaximizeRestoreButton(frame));
-        buttons.add(createCloseButton(frame));
+
+        buttons.add(createWindowButton("\u2013", frame, theme, false, () -> frame.setState(JFrame.ICONIFIED)));
+        buttons.add(createWindowButton("\u25A1", frame, theme, false, () -> {
+            if (isMaximized) {
+                frame.setBounds(savedBounds);
+                isMaximized = false;
+            } else {
+                savedBounds = frame.getBounds();
+                Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+                frame.setBounds(screenBounds);
+                isMaximized = true;
+            }
+        }));
+        buttons.add(createWindowButton("\u2715", frame, theme, true, () ->
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))));
 
         add(title, BorderLayout.WEST);
         add(buttons, BorderLayout.EAST);
 
-        // Drag behavior
+        // Drag functionality
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 initialClick = e.getPoint();
             }
         });
-
-        addMouseMotionListener(new MouseAdapter() {
+        addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
-                int thisX = frame.getLocation().x;
-                int thisY = frame.getLocation().y;
-                int xMoved = e.getX() - initialClick.x;
-                int yMoved = e.getY() - initialClick.y;
-                frame.setLocation(thisX + xMoved, thisY + yMoved);
-            }
-        });
-
-        setPreferredSize(new Dimension(frame.getWidth(), 32));
-    }
-
-    private JButton createMinimizeButton(JFrame frame) {
-        return createIconButton(g -> {
-            g.setColor(Color.LIGHT_GRAY);
-            g.fillRect(10, 18, 12, 2);
-        }, () -> frame.setState(JFrame.ICONIFIED));
-    }
-
-    private JButton createMaximizeRestoreButton(JFrame frame) {
-        return createIconButton(g -> {
-            g.setColor(Color.LIGHT_GRAY);
-            g.drawRect(9, 9, 14, 14);
-        }, () -> {
-            if (frame.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
-                frame.setExtendedState(JFrame.NORMAL);
-            } else {
-                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }
-        });
-    }
-
-    private JButton createCloseButton(JFrame frame) {
-        return createIconButton(g -> {
-            g.setColor(Color.LIGHT_GRAY);
-            g.drawLine(10, 10, 20, 20);
-            g.drawLine(10, 20, 20, 10);
-        }, frame::dispose);
-    }
-
-    private JButton createIconButton(PaintIcon painter, Runnable action) {
-        final int[] alpha = {0};
-        Timer fadeInTimer = new Timer(15, null);
-        Timer fadeOutTimer = new Timer(15, null);
-
-        JButton button = new JButton() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g.create();
-                if (alpha[0] > 0) {
-                    g2d.setColor(new Color(255, 255, 255, alpha[0]));
-                    g2d.fillRect(0, 0, getWidth(), getHeight());
+                if (!isMaximized) {
+                    int xMoved = e.getX() - initialClick.x;
+                    int yMoved = e.getY() - initialClick.y;
+                    frame.setLocation(frame.getX() + xMoved, frame.getY() + yMoved);
                 }
-                g2d.dispose();
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g;
-                painter.paint(g2);
             }
-        };
+        });
+    }
 
-        button.setOpaque(false);
-        button.setContentAreaFilled(false);
+    private JButton createWindowButton(String symbol, JFrame frame, EditorTheme theme, boolean isClose, Runnable onClick) {
+        JButton button = new JButton(symbol);
+        button.setFont(new Font("Dialog", Font.BOLD, 18));
+        button.setPreferredSize(new Dimension(50, 40));
+        button.setForeground(Color.LIGHT_GRAY);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setPreferredSize(new Dimension(34, 30));
+        button.setContentAreaFilled(false);
 
-        fadeInTimer.addActionListener(e -> {
-            alpha[0] = Math.min(alpha[0] + 10, 60);
-            button.repaint();
-            if (alpha[0] >= 60) fadeInTimer.stop();
-        });
+        Color baseColor = new Color(43, 43, 43);
+        Color hoverColor = isClose ? new Color(180, 50, 50) : new Color(70, 70, 70);
 
-        fadeOutTimer.addActionListener(e -> {
-            alpha[0] = Math.max(alpha[0] - 10, 0);
-            button.repaint();
-            if (alpha[0] <= 0) fadeOutTimer.stop();
-        });
-
+        Timer hoverTimer = new Timer(15, null);
         button.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                fadeOutTimer.stop();
-                fadeInTimer.start();
+            boolean hovering = false;
+            float blend = 0f;
+            {
+                hoverTimer.addActionListener(e -> {
+                    if (hovering && blend < 1f) blend += 0.1f;
+                    else if (!hovering && blend > 0f) blend -= 0.1f;
+
+                    Color blendColor = blendColors(baseColor, hoverColor, blend);
+                    button.setBackground(blendColor);
+                    button.setOpaque(blend > 0);
+                    button.repaint();
+
+                    if (blend <= 0f || blend >= 1f) hoverTimer.stop();
+                });
             }
 
-            @Override
+            public void mouseEntered(MouseEvent e) {
+                hovering = true;
+                hoverTimer.start();
+            }
+
             public void mouseExited(MouseEvent e) {
-                fadeInTimer.stop();
-                fadeOutTimer.start();
+                hovering = false;
+                hoverTimer.start();
             }
         });
 
-        button.addActionListener(e -> action.run());
-
+        button.addActionListener(e -> onClick.run());
         return button;
     }
 
-
-
-
-    @FunctionalInterface
-    private interface PaintIcon {
-        void paint(Graphics2D g);
+    private Color blendColors(Color base, Color target, float ratio) {
+        int r = (int) (base.getRed() * (1 - ratio) + target.getRed() * ratio);
+        int g = (int) (base.getGreen() * (1 - ratio) + target.getGreen() * ratio);
+        int b = (int) (base.getBlue() * (1 - ratio) + target.getBlue() * ratio);
+        return new Color(r, g, b);
     }
 }

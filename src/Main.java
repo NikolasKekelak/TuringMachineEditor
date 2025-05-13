@@ -1,6 +1,7 @@
+import Editor.TuringEditorUI;
+
 import javax.swing.*;
 
-import Editor.TuringEditorUI;
 
 class Main{
     public static void main(String[] args) {
@@ -12,7 +13,6 @@ class Main{
 
         SwingUtilities.invokeLater(() -> new TuringEditorUI(
                 "turingmachine"
-
         ));
     }
 }
